@@ -8,6 +8,7 @@ use App\Models\Result;
 use App\Models\Answer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class QuizController extends Controller
 {
@@ -53,11 +54,7 @@ class QuizController extends Controller
             'answers' => 'required|array',
         ]);
 
-        $quiz = Quiz::with([
-            'questions.options' => function ($query) {
-                $query->where('is_correct', 1);
-            }
-        ])->findOrFail($id);
+        $quiz = Quiz::with('questions.options')->findOrFail($id);
 
         $user = auth()->user();
         $score = 0;
@@ -110,7 +107,7 @@ class QuizController extends Controller
             ->where('user_id', auth()->id())
             ->findOrFail($id);
 
-        return view('result', compact('result'));
+        return view('user.result', compact('result'));
     }
 
     public function showAllQuizzesPublic()
@@ -191,7 +188,6 @@ class QuizController extends Controller
         $quiz = Quiz::findOrFail($id);
 
         if ($request->hasFile('image')) {
-            // hapus file lama jika ada
             if ($quiz->image) {
                 Storage::disk('public')->delete($quiz->image);
             }

@@ -7,7 +7,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Barryvdh\DomPDF\Facade\Pdf;
-use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\UserExport;
 
@@ -159,7 +158,6 @@ class UserController extends Controller
     {
         $user = User::findOrFail($id);
 
-        // Soft delete all related quizzes, questions, options, results
         foreach ($user->quizzes as $quiz) {
             foreach ($quiz->questions as $question) {
                 $question->options()->delete();
@@ -196,7 +194,6 @@ class UserController extends Controller
     {
         $user = User::onlyTrashed()->findOrFail($id);
 
-        // Force delete all related quizzes, questions, options, results
         foreach ($user->quizzes()->onlyTrashed()->get() as $quiz) {
             $quiz->results()->forceDelete();
             foreach ($quiz->questions()->onlyTrashed()->get() as $question) {
@@ -208,5 +205,33 @@ class UserController extends Controller
 
         $user->forceDelete();
         return redirect()->back()->with('success','Berhasil menghapus data seutuhnya!');
+    }
+
+    public function chart()
+    {
+        // Get user registration data for the last 30 days
+        $usersPerDay = User::selectRaw('DATE(created_at) as date, COUNT(*) as count')
+            ->where('created_at', '>=', now()->subDays(30))
+            ->groupBy('date')
+            ->orderBy('date')
+            ->get();
+
+        $labels = [];
+        $data = [];
+
+        // Fill in missing dates with 0
+        $startDate = now()->subDays(29)->startOfDay();
+        for ($i = 0; $i < 30; $i++) {
+            $currentDate = $startDate->copy()->addDays($i)->format('Y-m-d');
+            $labels[] = $startDate->copy()->addDays($i)->format('d/m');
+
+            $count = $usersPerDay->where('date', $currentDate)->first();
+            $data[] = $count ? $count->count : 0;
+        }
+
+        return response()->json([
+            'labels' => $labels,
+            'data' => $data
+        ]);
     }
 }

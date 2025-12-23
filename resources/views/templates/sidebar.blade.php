@@ -28,12 +28,6 @@
 
                 @if(Auth::user()->role == 'admin')
                     <li class="nav-item mb-2">
-                        <a href="{{ route('admin.quizzes.index') }}" class="nav-link text-light">
-                            <i class="fas fa-clipboard-list me-2"></i>Data Quiz
-                        </a>
-                    </li>
-
-                    <li class="nav-item mb-2">
                         <a href="{{ route('admin.user.index') }}" class="nav-link text-light">
                             <i class="fas fa-user-group me-2"></i>Data Pengguna
                         </a>
