@@ -209,7 +209,6 @@ class UserController extends Controller
 
     public function chart()
     {
-        // Get user registration data for the last 30 days
         $usersPerDay = User::selectRaw('DATE(created_at) as date, COUNT(*) as count')
             ->where('created_at', '>=', now()->subDays(30))
             ->groupBy('date')
@@ -219,7 +218,6 @@ class UserController extends Controller
         $labels = [];
         $data = [];
 
-        // Fill in missing dates with 0
         $startDate = now()->subDays(29)->startOfDay();
         for ($i = 0; $i < 30; $i++) {
             $currentDate = $startDate->copy()->addDays($i)->format('Y-m-d');

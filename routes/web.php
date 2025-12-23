@@ -36,7 +36,6 @@ Route::middleware('isAdmin')->prefix('/admin')->name('admin.')->group(function (
     })->name('dashboard');
 
     Route::get('/users/chart', [UserController::class, 'chart'])->name('users.chart');
-
     Route::prefix('/user')->name('user.')->group(function () {
         Route::get('/', [UserController::class, 'index'])->name('index');
         Route::get('/create', [UserController::class, 'create'])->name('create');
